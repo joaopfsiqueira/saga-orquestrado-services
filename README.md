@@ -48,8 +48,6 @@
 
 No curso, desenvolveremos a seguinte aquitetura:
 
-![Arquitetura](Conte%C3%BAdos/Arquitetura%20Proposta.png)
-
 Em nossa arquitetura, teremos 5 serviços:
 
 * **Order-Service**: microsserviço responsável apenas por gerar um pedido inicial, e receber uma notificação. Aqui que teremos endpoints REST para inciar o processo e recuperar os dados dos eventos. O banco de dados utilizado será o MongoDB.
@@ -144,8 +142,6 @@ http://localhost:3000/swagger-ui.html
 
 Você chegará nesta página:
 
-![Swagger](Conte%C3%BAdos/Documentacao.png)
-
 As aplicações executarão nas seguintes portas:
 
 * Order-Service: 3000
@@ -169,8 +165,6 @@ Para acessar o Redpanda Console e visualizar tópicos e publicar eventos, basta 
 http://localhost:8081
 
 Você chegará nesta página:
-
-![Redpanda](Conte%C3%BAdos/Redpanda%20Kafka.png)
 
 ## Dados da API
 
