@@ -4,9 +4,24 @@ server:
 
 spring:
 
+   kafka:
+      bootstrap-servers: ${KAFKA_BROKER:localhost:9092}
+      topic:
+        teste:teste
+      consumer:
+            group-id: order-group # consumer group id, cada app vai ter o seu consumer group!
+            auto-offset-reset: latest
+
 
    data:
     mongodb:
       uri: ${MONGO_DB_URI}:mongodb://mongodb:27017
       port: 27017
       database: admin
+
+
+logging:
+  level:
+    org:
+      apache:
+        kafka: OFF
