@@ -1,4 +1,4 @@
-package br.com.microservices.orchestrated.orderservice.config;
+package br.com.microservices.orchestrated.orderservice.config.kafka;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.core.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +53,13 @@ public class KafkaConfig {
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class); // SERELIAZA A CHAVE, JA QUE É O PRODUCER
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class); // SERELIAZA O VALOR, JA QUE É O PRODUCER
         return props;
+    }
+
+    //KAFKA TEMPLATE, QUEM VAI DE FATO INSTANCIAR O KAFKA NO CÓDIGO, ELE QUEM VAI FAZER A COMUNICAÇÃO COM O KAFKA
+    // ELE QUEM VAI ENVIAR E RECEBER MENSAGENS
+    @Bean
+    public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> producerFactory) {
+        return new KafkaTemplate<>(producerFactory());
     }
 
 }
