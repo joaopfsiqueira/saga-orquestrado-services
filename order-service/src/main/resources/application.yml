@@ -7,7 +7,9 @@ spring:
    kafka:
       bootstrap-servers: ${KAFKA_BROKER:localhost:9092}
       topic:
-        teste:teste
+        orchestrator: orchestrator
+        order-success: order-success
+        order-failure: order-failure
       consumer:
             group-id: order-group # consumer group id, cada app vai ter o seu consumer group!
             auto-offset-reset: latest
