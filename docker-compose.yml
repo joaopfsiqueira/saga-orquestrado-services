@@ -41,6 +41,19 @@ services:
     depends_on:
       - "kafka"
 
+  order-service:
+    build: './order-service'
+    container_name: order-service
+    ports:
+      - "3000:3000"
+    networks:
+        - orchestrator-saga
+    depends_on:
+      - kafka
+    environment:
+        - KAFKA_BROKER=kafka:29092
+        - MONGO_DB_URI=mongodb://localhost:27017
+
 networks:
   orchestrator-saga:
     driver: bridge
