@@ -54,6 +54,68 @@ services:
         - KAFKA_BROKER=kafka:29092
         - MONGO_DB_URI=mongodb://localhost:27017
 
+  orchestrator-service:
+    build: './orchestrator-service'
+    container_name: orchestrator-service
+    ports:
+      - "8080:8080"
+    networks:
+      - orchestrator-saga
+    depends_on:
+      - kafka
+    environment:
+      - KAFKA_BROKER=kafka:29092
+
+  product-validation-service:
+    build: './product-validation-service'
+    container_name: product-validation-service
+    ports:
+      - "8091:8091"
+    networks:
+      - orchestrator-saga
+    depends_on:
+      - kafka
+    environment:
+      - DB_HOST=localhost
+      - DB_NAME=product-db
+      - DB_PORT=5432
+      - DB_NAME=usuario
+      - DB_USER=senha
+      - KAFKA_BROKER=kafka:29092
+
+  payment-service:
+    build: './payment-service'
+    container_name: payment-service
+    ports:
+      - "8091:8091"
+    networks:
+      - orchestrator-saga
+    depends_on:
+      - kafka
+    environment:
+      - DB_HOST=localhost
+      - DB_NAME=payment-db
+      - DB_PORT=5432
+      - DB_NAME=usuario
+      - DB_USER=senha
+      - KAFKA_BROKER=kafka:29092
+
+  inventory-service:
+    build: './inventory-service'
+    container_name: inventory-service
+    ports:
+      - "8092:8092"
+    networks:
+      - orchestrator-saga
+    depends_on:
+      - kafka
+    environment:
+      - DB_HOST=localhost
+      - DB_PORT=5432
+      - DB_NAME=usuario
+      - DB_USER=senha
+      - KAFKA_BROKER=kafka:29092
+
 networks:
   orchestrator-saga:
     driver: bridge
