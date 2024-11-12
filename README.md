@@ -1,7 +1,5 @@
 # Padrão Saga Orquestrado
 
-![Arquitetura](Conte%C3%BAdos/Imagem%20Curso.png)
-
 ### Sumário:
 
 * [Tecnologias](#tecnologias)
