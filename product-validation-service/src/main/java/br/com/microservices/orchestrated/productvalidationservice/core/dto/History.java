@@ -1,5 +1,6 @@
 package br.com.microservices.orchestrated.productvalidationservice.core.dto;
 
+import br.com.microservices.orchestrated.productvalidationservice.core.enums.ESagaStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 public class History {
 
     private String source;
-    private String status;
+    private ESagaStatus status;
     private String message;
     private LocalDateTime createdAt;
 }
