@@ -21,5 +21,5 @@ public enum ETopics {
     NOTIFY_ENDING("notify-ending");
 
 
-    private String Topic;
+    private final String Topic;
 }
