@@ -28,7 +28,7 @@ public class ProductValidationConsumer {
             topics = "${spring.kafka.topic.product-validation-failure}"
     ) //esse metodo é um kafka listerner! uma função que consome do kafka
     public void ConsumeProductValidationFailureEvent(String payload) {
-        log.info("Receiving failure event {} from product-validation-failure topic", payload);
+        log.info("Receiving rollback event {} from product-validation-failure topic", payload);
         var event = jsonUtil.toEvent(payload);
         log.info(event.toString());
     }
