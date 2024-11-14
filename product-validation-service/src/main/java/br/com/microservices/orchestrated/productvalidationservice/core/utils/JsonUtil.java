@@ -1,7 +1,7 @@
 package br.com.microservices.orchestrated.productvalidationservice.core.utils;
 
 
-import br.com.microservices.orchestrated.orderservice.core.document.Event;
+import br.com.microservices.orchestrated.productvalidationservice.core.dto.Event;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
