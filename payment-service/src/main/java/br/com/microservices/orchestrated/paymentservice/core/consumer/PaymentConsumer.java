@@ -1,0 +1,37 @@
+package br.com.microservices.orchestrated.paymentservice.core.consumer;
+
+import br.com.microservices.orchestrated.orderservice.core.utils.JsonUtil;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component
+@AllArgsConstructor
+public class PaymentConsumer {
+
+    private final JsonUtil jsonUtil;
+
+    @KafkaListener(
+            groupId = "${spring.kafka.consumer.group-id}",
+            topics = "${spring.kafka.topic.payment-validation-success}"
+    ) //esse metodo é um kafka listerner! uma função que consome do kafka
+    public void ConsumePaymentValidationSuccessEvent(String payload) {
+        log.info("Receiving success event {} from payment-validation-success topic", payload);
+        var event = jsonUtil.toEvent(payload);
+        log.info(event.toString());
+    }
+
+    @KafkaListener(
+            groupId = "${spring.kafka.consumer.group-id}",
+            topics = "${spring.kafka.topic.payment-validation-failure}"
+    ) //esse metodo é um kafka listerner! uma função que consome do kafka
+    public void ConsumePaymentValidationFailureEvent(String payload) {
+        log.info("Receiving rollback event {} from payment-validation-failure topic", payload);
+        var event = jsonUtil.toEvent(payload);
+        log.info(event.toString());
+    }
+
+
+}
