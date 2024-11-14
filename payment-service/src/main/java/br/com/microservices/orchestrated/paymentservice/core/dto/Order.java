@@ -1,6 +1,5 @@
 package br.com.microservices.orchestrated.paymentservice.core.dto;
 
-import br.com.microservices.orchestrated.productvalidationservice.core.dto.OrderProduct;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
