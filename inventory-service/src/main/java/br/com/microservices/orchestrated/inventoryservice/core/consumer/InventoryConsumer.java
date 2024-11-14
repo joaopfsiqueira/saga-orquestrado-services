@@ -1,6 +1,6 @@
 package br.com.microservices.orchestrated.inventoryservice.core.consumer;
 
-import br.com.microservices.orchestrated.orderservice.core.utils.JsonUtil;
+import br.com.microservices.orchestrated.inventoryservice.core.utils.JsonUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -15,20 +15,20 @@ public class InventoryConsumer {
 
     @KafkaListener(
             groupId = "${spring.kafka.consumer.group-id}",
-            topics = "${spring.kafka.topic.inventory-validation-success}"
+            topics = "${spring.kafka.topic.inventory-success}"
     ) //esse metodo é um kafka listerner! uma função que consome do kafka
     public void ConsumeInventoryValidationSuccessEvent(String payload) {
-        log.info("Receiving success event {} from inventory-validation-success topic", payload);
+        log.info("Receiving success event {} from inventory-success topic", payload);
         var event = jsonUtil.toEvent(payload);
         log.info(event.toString());
     }
 
     @KafkaListener(
             groupId = "${spring.kafka.consumer.group-id}",
-            topics = "${spring.kafka.topic.inventory-validation-failure}"
+            topics = "${spring.kafka.topic.inventory-failure}"
     ) //esse metodo é um kafka listerner! uma função que consome do kafka
     public void ConsumeInventoryValidationFailureEvent(String payload) {
-        log.info("Receiving rollback event {} from inventory-validation-failure topic", payload);
+        log.info("Receiving rollback event {} from inventory-failure topic", payload);
         var event = jsonUtil.toEvent(payload);
         log.info(event.toString());
     }
