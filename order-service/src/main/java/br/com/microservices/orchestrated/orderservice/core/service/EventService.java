@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -21,6 +22,10 @@ public class EventService {
         event.setCreatedAt(LocalDateTime.now());
         save(event);
         log.info("Order {} has been notified! TransactionId: {}", event.getOrderId(), event.getTransactionId());
+    }
+
+    public List<Event> findAll() {
+        return repository.findAllByOrderByCreatedAtDesc();
     }
 
     public Event save(Event event) {
