@@ -3,6 +3,7 @@ package br.com.microservices.orchestrated.productvalidationservice.core.service;
 
 import br.com.microservices.orchestrated.productvalidationservice.core.dto.Event;
 import br.com.microservices.orchestrated.productvalidationservice.core.dto.History;
+import br.com.microservices.orchestrated.productvalidationservice.core.dto.OrderProduct;
 import br.com.microservices.orchestrated.productvalidationservice.core.model.Validation;
 import br.com.microservices.orchestrated.productvalidationservice.core.producer.KafkaProducer;
 import br.com.microservices.orchestrated.productvalidationservice.core.repository.ProductRepository;
@@ -44,13 +45,36 @@ public class ProductValidationService {
         producer.sendEvent(jsonUtil.toJson(event));
     }
 
-    private void checkCurrentValidation(Event event) {
+    private void validateProductsInformed(Event event) {
         if (isEmpty(event.getOrder()) || isEmpty(event.getOrder().getProducts())) {
             throw new ValidateException("Product list is empty");
         }
 
         if (isEmpty(event.getOrder().getId()) || isEmpty(event.getOrder().getTransactionId())) {
             throw new ValidateException("Order ID or Transaction ID must be informed!");
+        }
+    }
+
+    private void checkCurrentValidation(Event event) {
+        validateProductsInformed(event);
+        if (validationRepository.existsByOrderIdAndTransactionId(event.getOrderId(), event.getTransactionId())) {
+            throw new ValidateException("There's another transactionId for this validation.");
+        }
+        event.getOrder().getProducts().forEach(product -> {
+            validateProductInformed(product);
+            validateExistingProduct(product.getProduct().getCode());
+        });
+    }
+
+    private void validateProductInformed(OrderProduct product) {
+        if (isEmpty(product.getProduct()) || isEmpty(product.getProduct().getCode())) {
+            throw new ValidateException("Product must be informed!");
+        }
+    }
+
+    private void validateExistingProduct(String code) {
+        if (!productRepository.existsByCode(code)) {
+            throw new ValidateException("Product not found!");
         }
     }
 
