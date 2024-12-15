@@ -115,6 +115,50 @@ services:
       - DB_NAME=usuario
       - DB_USER=senha
       - KAFKA_BROKER=kafka:29092
+  product-db:
+    image: postgres:latest
+    container_name: product-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: product_user
+      POSTGRES_PASSWORD: product_password
+      POSTGRES_DB: product
+
+  payment-db:
+    image: postgres:latest
+    container_name: payment-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: payment_user
+      POSTGRES_PASSWORD: payment_password
+      POSTGRES_DB: payment
+
+  inventory-db:
+    image: postgres:latest
+    container_name: inventory-db
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: inventory_user
+      POSTGRES_PASSWORD: inventory_password
+      POSTGRES_DB: inventory
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_USER: main_user
+      POSTGRES_PASSWORD: main_password
+      POSTGRES_DB: main
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
 
 networks:
   orchestrator-saga:
