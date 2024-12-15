@@ -36,7 +36,7 @@ public class ProductValidationService {
     public void validateExistingProducts(Event event) {
         try {
             checkCurrentValidation(event);
-            createValidation(event);
+            createValidation(event, true);
             handleSuccess(event);
         } catch (Exception e) {
             log.error("Error validating existing products", e);
