@@ -16,7 +16,7 @@ spring:
 
     datasource:
       driver-class-name: org.postgresql.Driver
-      url: jdbc:postgresql://${DB_HOST:localhost}:5432/inventory-db
+      url: jdbc:postgresql://${DB_HOST:localhost}:5434/inventory-db
       username: usuario
       password: senha
 
