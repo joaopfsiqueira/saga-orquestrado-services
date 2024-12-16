@@ -1,6 +1,7 @@
 package br.com.microservices.orchestrated.paymentservice.core.service;
 
 import br.com.microservices.orchestrated.paymentservice.core.dto.Event;
+import br.com.microservices.orchestrated.paymentservice.core.dto.History;
 import br.com.microservices.orchestrated.paymentservice.core.dto.OrderProduct;
 import br.com.microservices.orchestrated.paymentservice.core.enums.EPaymentStatus;
 import br.com.microservices.orchestrated.paymentservice.core.enums.ESagaStatus;
@@ -12,6 +13,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.security.oauthbearer.internals.secured.ValidateException;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -78,6 +81,23 @@ public class PaymentService {
     private void changePaymentToSuccess(Payment payment) {
         payment.setPaymentStatus(EPaymentStatus.SUCCESS);
         save(payment);
+    }
+
+    private void handleSuccess(Event event) {
+        event.setStatus(ESagaStatus.SUCCESS);
+        event.setSource(CURRENT_SOURCE);
+        addHistory(event);
+    }
+
+    private void addHistory(Event event) {
+        var history = History
+                .builder()
+                .source(event.getSource())
+                .status(event.getStatus())
+                .message("Payment realized with success")
+                .createdAt(LocalDateTime.now())
+                .build();
+        event.addToHistory(history);
     }
 
     private void validateAmount(Double amount) {
