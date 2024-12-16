@@ -47,8 +47,8 @@ public class PaymentService {
                 .totalItems(calculateTotalItems(event))
                 .totalAmount(calculateAmount(event))
                 .build();
-
         save(payment);
+        setEventAmountItems(event, payment);
     }
 
     private void save(Payment payment) {
@@ -66,5 +66,10 @@ public class PaymentService {
         return event.getOrder().getProducts().stream()
                 .map(OrderProduct::getQuantity)
                 .reduce(0, Integer::sum);
+    }
+
+    private void setEventAmountItems(Event event, Payment payment) {
+        event.getOrder().setTotalAmount(payment.getTotalAmount());
+        event.getOrder().setTotalItems(payment.getTotalItems());
     }
 }
