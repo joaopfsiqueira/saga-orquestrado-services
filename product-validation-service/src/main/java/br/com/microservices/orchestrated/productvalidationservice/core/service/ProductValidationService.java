@@ -51,7 +51,7 @@ public class ProductValidationService {
             throw new ValidateException("Product list is empty");
         }
 
-        if (isEmpty(event.getOrder().getId()) || isEmpty(event.getOrder().getTransactionId())) {
+        if (isEmpty(event.getOrder().getId()) || isEmpty(event.getTransactionId())) {
             throw new ValidateException("Order ID or Transaction ID must be informed!");
         }
     }
