@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+import static br.com.microservices.orchestrated.paymentservice.core.enums.ESagaStatus.ROLLBACK_PENDING;
+
 @Slf4j
 @Service
 @AllArgsConstructor
@@ -86,15 +88,15 @@ public class PaymentService {
     private void handleSuccess(Event event) {
         event.setStatus(ESagaStatus.SUCCESS);
         event.setSource(CURRENT_SOURCE);
-        addHistory(event);
+        addHistory(event, "Payment realized with success");
     }
 
-    private void addHistory(Event event) {
+    private void addHistory(Event event, String message) {
         var history = History
                 .builder()
                 .source(event.getSource())
                 .status(event.getStatus())
-                .message("Payment realized with success")
+                .message(message)
                 .createdAt(LocalDateTime.now())
                 .build();
         event.addToHistory(history);
@@ -104,6 +106,27 @@ public class PaymentService {
         if(amount < MIN_AMOUNT_VALUE) {
             throw new ValidateException("The minimum amount value is 0.1".concat(MIN_AMOUNT_VALUE.toString()));
         }
+    }
+
+    private void handleFailCurrentNotExecuted(Event event, String message) {
+        event.setStatus(ROLLBACK_PENDING);
+        event.setSource(CURRENT_SOURCE);
+        addHistory(event, "Fail to realize payment: ".concat(message));
+    }
+
+    private void realizeRefound(Event event) {
+        changePaymentStatusToRefound(event);
+        event.setStatus(ESagaStatus.FAIL);
+        event.setSource(CURRENT_SOURCE);
+        addHistory(event, "Rollback executed for Payment!");
+        producer.sendEvent(jsonUtil.toJson(event));
+    }
+
+    private void changePaymentStatusToRefound(Event event) {
+        var payment = findByOrderIdAndTransactionId(event);
+        payment.setPaymentStatus(EPaymentStatus.REFOUND);
+        setEventAmountItems(event, payment);
+        save(payment);
     }
 
     private Payment findByOrderIdAndTransactionId(Event event) {
