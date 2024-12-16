@@ -4,6 +4,7 @@ package br.com.microservices.orchestrated.productvalidationservice.core.service;
 import br.com.microservices.orchestrated.productvalidationservice.core.dto.Event;
 import br.com.microservices.orchestrated.productvalidationservice.core.dto.History;
 import br.com.microservices.orchestrated.productvalidationservice.core.dto.OrderProduct;
+import br.com.microservices.orchestrated.productvalidationservice.core.enums.ESagaStatus;
 import br.com.microservices.orchestrated.productvalidationservice.core.model.Validation;
 import br.com.microservices.orchestrated.productvalidationservice.core.producer.KafkaProducer;
 import br.com.microservices.orchestrated.productvalidationservice.core.repository.ProductRepository;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
-import static br.com.microservices.orchestrated.productvalidationservice.core.enums.ESagaStatus.SUCCESS;
+import static br.com.microservices.orchestrated.productvalidationservice.core.enums.ESagaStatus.*;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Slf4j
@@ -104,5 +105,30 @@ public class ProductValidationService {
                 .createdAt(LocalDateTime.now())
                 .build();
         event.addToHistory(history);
+    }
+
+    private void handleFailCurrentNotExecuted(Event event, String message) {
+        event.setStatus(ROLLBACK_PENDING);
+        event.setSource(CURRENT_SOURCE);
+        addHistory(event, "Fail to validate products: ".concat(message));
+    }
+
+    // busca no banco de dados a validação e verifica se foi bem sucedida
+    public void rollbackEvent(Event event) {
+        changeValidationToFail(event);
+        event.setStatus(FAIL);
+        event.setSource(CURRENT_SOURCE);
+        addHistory(event, "Rollback executed on Product Validation Service");
+        producer.sendEvent(jsonUtil.toJson(event));
+    }
+
+    // busca no banco de dados, se não existir insere com status de falha.
+    private void changeValidationToFail(Event event) {
+       validationRepository.findByOrderIdAndTransactionId(event.getOrder().getId(),
+               event.getTransactionId())
+               .ifPresentOrElse(validation -> {
+           validation.setSuccess(false);
+           validationRepository.save(validation);
+       }, () -> createValidation(event, false));
     }
 }
