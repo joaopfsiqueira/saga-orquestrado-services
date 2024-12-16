@@ -114,7 +114,7 @@ public class PaymentService {
         addHistory(event, "Fail to realize payment: ".concat(message));
     }
 
-    private void realizeRefound(Event event) {
+    public void realizeRefound(Event event) {
         changePaymentStatusToRefound(event);
         event.setStatus(ESagaStatus.FAIL);
         event.setSource(CURRENT_SOURCE);
