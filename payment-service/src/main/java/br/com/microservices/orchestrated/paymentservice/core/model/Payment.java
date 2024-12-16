@@ -48,6 +48,7 @@ public class Payment {
         var now = LocalDateTime.now();
         createdAt = now;
         updatedAt = now;
+        status = EPaymentStatus.PENDING;
     }
 
     @PreUpdate // caso ja exista, só atualiza o update
