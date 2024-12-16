@@ -2,6 +2,7 @@ package br.com.microservices.orchestrated.paymentservice.core.service;
 
 import br.com.microservices.orchestrated.paymentservice.core.dto.Event;
 import br.com.microservices.orchestrated.paymentservice.core.dto.OrderProduct;
+import br.com.microservices.orchestrated.paymentservice.core.enums.ESagaStatus;
 import br.com.microservices.orchestrated.paymentservice.core.model.Payment;
 import br.com.microservices.orchestrated.paymentservice.core.producer.KafkaProducer;
 import br.com.microservices.orchestrated.paymentservice.core.repository.PaymentRepository;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Service;
 public class PaymentService {
 
     private static final String CURRENT_SOURCE = "PAYMENT_SERVICE";
+    private static final Double REDUCE_SUM_VALUE = 0.0;
+    private static final Double MIN_AMOUNT_VALUE = 0.1;
 
     private final JsonUtil jsonUtil;
     private final KafkaProducer producer;
@@ -26,6 +29,8 @@ public class PaymentService {
         try {
             checkCurrentValidation(event);
             createPendingPayment(event);
+            var payment = findByOrderIdAndTransactionId(event);
+            validateAmount(payment.getTotalAmount());
             handleSuccess(event);
         } catch (Exception e) {
             log.error("Error realizing payment", e);
@@ -51,25 +56,41 @@ public class PaymentService {
         setEventAmountItems(event, payment);
     }
 
-    private void save(Payment payment) {
-        paymentRepository.save(payment);
-    }
-
     // metodo que vai calcular o valor total da compra, o reduce vai somar o valor de cada produto e incrementar
     private double calculateAmount(Event event) {
        return event.getOrder().getProducts().stream()
                .map(product -> product.getQuantity() * product.getProduct().getUnitValue())
-                .reduce(0.0, Double::sum);
+                .reduce(REDUCE_SUM_VALUE, Double::sum);
     }
 
     private int calculateTotalItems(Event event) {
         return event.getOrder().getProducts().stream()
                 .map(OrderProduct::getQuantity)
-                .reduce(0, Integer::sum);
+                .reduce(REDUCE_SUM_VALUE.intValue(), Integer::sum);
     }
 
     private void setEventAmountItems(Event event, Payment payment) {
         event.getOrder().setTotalAmount(payment.getTotalAmount());
         event.getOrder().setTotalItems(payment.getTotalItems());
+    }
+
+    private void handleSuccess(Event event) {
+        event.setSource(CURRENT_SOURCE);
+        event.setStatus(ESagaStatus.SUCCESS);
+    }
+
+    private void validateAmount(Double amount) {
+        if(amount < MIN_AMOUNT_VALUE) {
+            throw new ValidateException("The minimum amount value is 0.1".concat(MIN_AMOUNT_VALUE.toString()));
+        }
+    }
+
+    private Payment findByOrderIdAndTransactionId(Event event) {
+        return paymentRepository.findByOrderIdAndTransactionId(event.getOrder().getId(), event.getTransactionId())
+                .orElseThrow(() -> new ValidateException("Payment not found by OrderId and TransactionId"));
+    }
+
+    private void save(Payment payment) {
+        paymentRepository.save(payment);
     }
 }
