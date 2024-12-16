@@ -34,6 +34,7 @@ public class Payment {
     private double totalAmount;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private EPaymentStatus paymentStatus;
 
     @Column(nullable = false, updatable = false)
