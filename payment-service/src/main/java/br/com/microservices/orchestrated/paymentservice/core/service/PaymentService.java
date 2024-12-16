@@ -2,6 +2,7 @@ package br.com.microservices.orchestrated.paymentservice.core.service;
 
 import br.com.microservices.orchestrated.paymentservice.core.dto.Event;
 import br.com.microservices.orchestrated.paymentservice.core.dto.OrderProduct;
+import br.com.microservices.orchestrated.paymentservice.core.enums.EPaymentStatus;
 import br.com.microservices.orchestrated.paymentservice.core.enums.ESagaStatus;
 import br.com.microservices.orchestrated.paymentservice.core.model.Payment;
 import br.com.microservices.orchestrated.paymentservice.core.producer.KafkaProducer;
@@ -31,7 +32,7 @@ public class PaymentService {
             createPendingPayment(event);
             var payment = findByOrderIdAndTransactionId(event);
             validateAmount(payment.getTotalAmount());
-            handleSuccess(event);
+            changePaymentToSuccess(payment);
         } catch (Exception e) {
             log.error("Error realizing payment", e);
             handleFailCurrentNotExecuted(event, e.getMessage());
@@ -74,9 +75,9 @@ public class PaymentService {
         event.getOrder().setTotalItems(payment.getTotalItems());
     }
 
-    private void handleSuccess(Event event) {
-        event.setSource(CURRENT_SOURCE);
-        event.setStatus(ESagaStatus.SUCCESS);
+    private void changePaymentToSuccess(Payment payment) {
+        payment.setPaymentStatus(EPaymentStatus.SUCCESS);
+        save(payment);
     }
 
     private void validateAmount(Double amount) {
