@@ -30,6 +30,16 @@ public class OrderInventory {
     @Column(nullable = false)
     private String transactionId;
 
+    // LÓGICA DE STOCK. QUANTIDADE DE PEDIDO, QUANTIDADE ANTIGA E QUANTIDADE NOVA
+    @Column(nullable = false)
+    private Integer orderQuantity;
+
+    @Column(nullable = false)
+    private Integer oldQuantity;
+
+    @Column(nullable = false)
+    private Integer newQuantity;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
