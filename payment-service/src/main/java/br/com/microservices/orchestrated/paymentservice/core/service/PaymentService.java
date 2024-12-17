@@ -115,10 +115,14 @@ public class PaymentService {
     }
 
     public void realizeRefound(Event event) {
-        changePaymentStatusToRefound(event);
         event.setStatus(ESagaStatus.FAIL);
         event.setSource(CURRENT_SOURCE);
-        addHistory(event, "Rollback executed for Payment!");
+        try {
+            changePaymentStatusToRefound(event);
+            addHistory(event, "Rollback executed for Payment!");
+        } catch (Exception e) {
+            addHistory(event, "Rollback not executed for Payment!".concat(e.getMessage()));
+        }
         producer.sendEvent(jsonUtil.toJson(event));
     }
 
