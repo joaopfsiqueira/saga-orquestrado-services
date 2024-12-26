@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+import static br.com.microservices.orchestrated.inventoryservice.core.enums.ESagaStatus.ROLLBACK_PENDING;
+
 @Slf4j
 @Service
 @AllArgsConstructor
@@ -39,6 +41,7 @@ public class InventoryService {
             handleSuccess(event);
         } catch (Exception e) {
             log.error("Error updating inventory", e);
+            handleFailCurrentNotExecuted(event, e.getMessage());
 
         }
         producer.sendEvent(jsonUtil.toJson(event));
@@ -102,6 +105,34 @@ public class InventoryService {
                 .createdAt(LocalDateTime.now())
                 .build();
         event.addToHistory(history);
+    }
+
+    private void handleFailCurrentNotExecuted(Event event, String message) {
+        event.setStatus(ROLLBACK_PENDING);
+        event.setSource(CURRENT_SOURCE);
+        addHistory(event, "Fail to update inventory: ".concat(message));
+    }
+
+    public void rollbackInventory(Event event) {
+        event.setStatus(ESagaStatus.FAIL);
+        event.setSource(CURRENT_SOURCE);
+        try {
+            returnInventoryToPreviousValues(event);
+            addHistory(event, "Rollback executed for Inventory!");
+        } catch (Exception e) {
+            addHistory(event, "Rollback not executed for Inventory!".concat(e.getMessage()));
+        }
+        producer.sendEvent(jsonUtil.toJson(event));
+    }
+
+    private void returnInventoryToPreviousValues(Event event) {
+        orderInventoryRepository.findByOrderIdAndTransactionId(event.getOrderId(), event.getTransactionId())
+                .forEach(orderInventory -> {
+                    var inventory = orderInventory.getInventory();
+                    inventory.setAvailable(orderInventory.getOldQuantity());
+                    inventoryRepository.save(inventory);
+                    log.info("Restored inventory for order {} from {} to {}", orderInventory.getOrderId(), orderInventory.getNewQuantity(), orderInventory.getOldQuantity());
+                });
     }
 
     private Inventory findInventoryByProductCode(String productCode) {
