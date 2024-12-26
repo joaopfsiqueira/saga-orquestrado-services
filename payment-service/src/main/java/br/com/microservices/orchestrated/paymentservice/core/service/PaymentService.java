@@ -38,6 +38,7 @@ public class PaymentService {
             var payment = findByOrderIdAndTransactionId(event);
             validateAmount(payment.getTotalAmount());
             changePaymentToSuccess(payment);
+            handleSuccess(event);
         } catch (Exception e) {
             log.error("Error realizing payment", e);
             handleFailCurrentNotExecuted(event, e.getMessage());
