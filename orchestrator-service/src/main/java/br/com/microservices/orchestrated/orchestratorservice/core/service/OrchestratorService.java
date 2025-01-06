@@ -19,7 +19,7 @@ import static br.com.microservices.orchestrated.orchestratorservice.core.enums.E
 @Slf4j
 @Service
 @AllArgsConstructor
-public class OrchestrationService {
+public class OrchestratorService {
 
     private final SagaOrchestratorProducer producer;
     private final JsonUtil jsonUtil;
